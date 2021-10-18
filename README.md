@@ -45,7 +45,7 @@ The script takes three parameters:
    Example run:
    
 
-    python extract.py -cp /home/martin/koki/extract/config.json -ip /home/martin/koki/extract/minta_konyvtar -op /home/martin/koki/extract/feature_extract_output
+    python extract.py -cp ./config_example.json -ip ./input_directory_example -op ./output_directory
 
 To run the script you need to have BluePyEfe installed. If you want to collect global features (e.g.: rheobase current and all features grouped by rheobase current, fI-curve slopes, etc.) please install the following, modified version of BPE: https://github.com/blazma/BluePyEfe (dev branch)
 
