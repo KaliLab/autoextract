@@ -139,7 +139,7 @@
         "v_corr": false,
         "ljp": 0,
         "location": "soma",
-        "hypamp": 0.0,
+        "hypamp": 0.0
     },
     "options": {
         "relative": false,
