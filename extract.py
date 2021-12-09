@@ -66,9 +66,14 @@ for cell in cell_directories:
             filter(lambda name: "protocol" not in name, files))  # select only true measurement files
 
         # read protocol file
-        with open(measurement_dir_path + '/protocol.txt') as protocol_file:
-            protocol_file_content = [line.strip("\n") for line in
-                                     protocol_file.readlines()]  # read protocol file content, strip newline characters
+        try:
+            with open(measurement_dir_path + '/protocol.txt') as protocol_file:
+                protocol_file_content = [line.strip("\n") for line in
+                                         protocol_file.readlines()]  # read protocol file content, strip newline characters
+        except FileNotFoundError:
+            print("[ERROR][{}] Protocol file not found. Skipping measurement.".format(measurement_dir))
+            continue
+
         missing_swps = []
         if len(protocol_file_content) == 5:  # when there is no missing sweep the last line is empty
             protocol_type, channel, sampling_rate, parameters, amplitudes = protocol_file_content
