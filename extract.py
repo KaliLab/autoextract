@@ -98,6 +98,17 @@ for cell in cell_directories:
             missing_swps_indices = list(map(lambda idx: int(idx) - 1, missing_swps.split()))  # format sweep indices
             missing_swps = [amplitudes[idx] for idx in missing_swps_indices]
 
+        # check if correct number of sweeps
+        with open("{}/{}.txt".format(cell_directory_path, channel_meas_file), "r") as channel_meas_file_object:
+            channel_meas_file_content = channel_meas_file_object.readlines()
+            num_columns = len(channel_meas_file_content[0].split("\t"))
+            num_amplitudes = len(amplitudes)
+            if num_columns != num_amplitudes:
+                print("[Warning][{}] number of columns in measurement file doesn't match number of amplitudes." \
+                      "Number of amplitudes: {}. Number of columns: {}. Skipping measurement."
+                      .format(measurement_dir, num_amplitudes, num_columns))
+                continue
+
         # collect protocol.txt data into measurement_dict
         measurement_dict[cell][measurement_dir] = {
             "protocol_type": protocol_type,
