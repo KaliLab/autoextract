@@ -204,6 +204,7 @@ for protocol_type in protocol_types:
     extractor.plt_features()
 
     extractor.feature_config_cells()
+    extractor.feature_config_meas()
     extractor.feature_config_all()
 
 # close log file
