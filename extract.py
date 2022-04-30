@@ -2,6 +2,8 @@ import os
 import sys
 import json
 import logging
+logging.basicConfig(filename='extract.log', level=logging.DEBUG,
+                    format='%(asctime)s [%(levelname)s] %(message)s')
 import argparse
 import bluepyefe as bpefe
 
@@ -23,17 +25,8 @@ def filter_measurements_by_protocol(measurement_dict, protocol_type):
                     filtered_measurement_dict[cell] = {}
                 filtered_measurement_dict[cell][measurement] = measurement_dict[cell][measurement]
     return filtered_measurement_dict
-
-
-def print_protocol_type(protocol_type):
-    # just because it's pretty
-    print("#" * 5 + "#" * (len(protocol_type) + 2) + "#" * 5)
-    print("#" * 5 + " {} ".format(protocol_type) + "#" * 5)
-    print("#" * 5 + "#" * (len(protocol_type) + 2) + "#" * 5)
 ##############################
 
-# save console output to log file
-sys.stdout = open('extract_log.txt', 'w')
 
 # parse arguments
 parser = argparse.ArgumentParser()
@@ -43,12 +36,14 @@ parser.add_argument('-op', '--output-path', type=str, help='Directory where the 
 args = parser.parse_args()
 
 # load config JSON containing feature extraction configuration info
+logging.info("Read autoextract config JSON")
 with open(args.config_path) as config_json:
     config = json.load(config_json)
 
 # set up variables in which we will collect from the protocol.txts
 protocol_types = set()  # as we iterate through cells and meaurements, unique protocol names will be collected here
 measurement_dict = {}  # this contains protocol data for each cell, for each measurement
+logging.info("Find unique protocols, collect protocol.txt data for each cell and each measurement")
 
 # find and iterate through input directory (each subdirectory is a cell)
 cell_directories = get_subdirectory_list(args.input_path)
@@ -71,7 +66,7 @@ for cell in cell_directories:
                 protocol_file_content = [line.strip("\n") for line in
                                          protocol_file.readlines()]  # read protocol file content, strip newline characters
         except FileNotFoundError:
-            print("[ERROR][{}] Protocol file not found. Skipping measurement.".format(measurement_dir))
+            logging.warning("Protocol file not found for measurement {}. Skipping measurement.".format(measurement_dir))
             continue
 
         missing_swps = []
@@ -109,9 +104,9 @@ for cell in cell_directories:
             num_columns = len(channel_meas_file_content[0].split("\t"))
             num_amplitudes = len(amplitudes)
             if num_columns != num_amplitudes:
-                print("[Warning][{}] number of columns in measurement file doesn't match number of amplitudes." \
-                      "Number of amplitudes: {}. Number of columns: {}. Skipping measurement."
-                      .format(measurement_dir, num_amplitudes, num_columns))
+                logging.warning("Number of columns in measurement file doesn't match number of amplitudes. " \
+                                "Number of amplitudes: {}. Number of columns: {}. Skipping measurement."
+                                .format(measurement_dir, num_amplitudes, num_columns))
                 continue
 
         # collect protocol.txt data into measurement_dict
@@ -128,7 +123,7 @@ for cell in cell_directories:
 # create BPE-compatible config dict, grouped by protocol
 # then run BPE for each protocol type
 for protocol_type in protocol_types:
-    print_protocol_type(protocol_type)
+    logging.info("Start extraction for protocol {}".format(protocol_type))
     cells_filtered = filter_measurements_by_protocol(measurement_dict, protocol_type)
 
     # create a new config dict that will become the input to BluePyEFe
@@ -141,10 +136,7 @@ for protocol_type in protocol_types:
         'cells': {}
     }
 
-    print("Cells:")
     for cell in cells_filtered:
-        print(" * " + cell)
-
         # these variables have the same value along the measurement protocol txts (for a given cell)
         amplitudes = []
         ton, toff, dt = None, None, None
@@ -199,13 +191,13 @@ for protocol_type in protocol_types:
     try:
         extractor.collect_global_features()
     except Exception:
-        logging.warning("This version of BluePyEfe does not contain global feature collection. Skipping.")
+        logging.warning("This version of BluePyEfe does not support global feature collection. Skipping.")
     extractor.mean_features()
     extractor.plt_features()
 
     extractor.feature_config_cells()
-    extractor.feature_config_meas()
+    try:
+        extractor.feature_config_meas()
+    except Exception:
+        logging.warning("This version of BluePyEfe does not support feature extraction separately for each measurement. Skipping.")
     extractor.feature_config_all()
-
-# close log file
-sys.stdout.close()
