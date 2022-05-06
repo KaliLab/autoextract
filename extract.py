@@ -146,8 +146,11 @@ for protocol_type in protocol_types:
         exclude = []
 
         for measurement in measurement_dict[cell]:
-            measurement_protocol = measurement_dict[cell][
-                measurement]  # this is the content of the protocol.txt belonging to this specific cell and measurement
+            measurement_protocol = measurement_dict[cell][measurement]  # this is the content of the protocol.txt belonging to this specific cell and measurement
+
+            # skip if not current protocol, will be processed later if not already
+            if measurement_protocol['protocol_type'] != protocol_type:
+                continue
 
             # these are pretty much read once and then get overwritten by the same value
             amplitudes = measurement_protocol['amplitudes']
