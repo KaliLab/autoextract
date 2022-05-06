@@ -190,7 +190,7 @@ for protocol_type in protocol_types:
     extractor.extract_features()
     try:
         extractor.collect_global_features()
-    except Exception:
+    except AttributeError:
         logging.warning("This version of BluePyEfe does not support global feature collection. Skipping.")
     extractor.mean_features()
     extractor.plt_features()
@@ -198,6 +198,6 @@ for protocol_type in protocol_types:
     extractor.feature_config_cells()
     try:
         extractor.feature_config_meas()
-    except Exception:
+    except AttributeError:
         logging.warning("This version of BluePyEfe does not support feature extraction separately for each measurement. Skipping.")
     extractor.feature_config_all()
