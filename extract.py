@@ -65,15 +65,20 @@ for cell in cell_directories:
             with open(measurement_dir_path + '/protocol.txt') as protocol_file:
                 protocol_file_content = [line.strip("\n") for line in
                                          protocol_file.readlines()]  # read protocol file content, strip newline characters
+                filter_empty = filter(lambda line: line != "", protocol_file_content)
+                protocol_file_content = list(filter_empty)
         except FileNotFoundError:
             logging.warning("Protocol file not found for measurement {}. Skipping measurement.".format(measurement_dir))
             continue
 
-        missing_swps = []
-        if len(protocol_file_content) == 5:  # when there is no missing sweep the last line is empty
-            protocol_type, channel, sampling_rate, parameters, amplitudes = protocol_file_content
-        else:
-            protocol_type, channel, sampling_rate, parameters, amplitudes, missing_swps = protocol_file_content
+        try:
+            missing_swps = []
+            if len(protocol_file_content) == 5:  # when there is no missing sweep the last line is empty
+                protocol_type, channel, sampling_rate, parameters, amplitudes = protocol_file_content
+            else:
+                protocol_type, channel, sampling_rate, parameters, amplitudes, missing_swps = protocol_file_content
+        except ValueError as e:
+            logging.error("Error thrown for cell {}, measurement {}. Traceback:".format(cell, measurement_dir), exc_info=True)
 
         # calculate BPE-compatible values
         dt = 1. / int(sampling_rate) * 1e3
