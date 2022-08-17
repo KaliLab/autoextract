@@ -57,8 +57,7 @@ for cell in cell_directories:
     for measurement_dir in measurement_dirs:
         measurement_dir_path = "{}/{}".format(cell_directory_path, measurement_dir)
         _, _, files = list(os.walk(measurement_dir_path))[0]
-        measurement_files = list(
-            filter(lambda name: "protocol" not in name, files))  # select only true measurement files
+        measurement_files = list(filter(lambda name: "protocol" and "._" not in name[:2], files))  # select only true measurement files
 
         # read protocol file
         try:
