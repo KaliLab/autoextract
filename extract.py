@@ -33,6 +33,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument('-cp', '--config-path', type=str, help='Path to JSON file containing extraction config info')
 parser.add_argument('-ip', '--input-path', type=str, help='Root path for elphys measurement files.')
 parser.add_argument('-op', '--output-path', type=str, help='Directory where the extraction results should be saved.')
+parser.add_argument('-pa', '--plot-all', type=bool, default=False, help='Create plots if True (default False)')
 args = parser.parse_args()
 
 # load config JSON containing feature extraction configuration info
@@ -193,14 +194,16 @@ for protocol_type in protocol_types:
     extractor = bpefe.Extractor(output_path_protocol, BPE_config)
     extractor.create_dataset()
     extractor.create_metadataset()
-    extractor.plt_traces()
+    if args.plot_all:
+        extractor.plt_traces()
     extractor.extract_features()
     try:
         extractor.collect_global_features()
     except AttributeError:
         logging.warning("This version of BluePyEfe does not support global feature collection. Skipping.")
     extractor.mean_features()
-    extractor.plt_features()
+    if args.plot_all:
+        extractor.plt_features()
 
     extractor.feature_config_cells()
     try:
