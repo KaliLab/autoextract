@@ -16,6 +16,9 @@ with open(measurements_text_path, "r") as measurement_text_file:
     measurements_lines = measurement_text_file.readlines()
 
     for measurements_line in measurements_lines:
+        if "#" in measurements_line:
+            continue
+
         measurement = measurements_line.split()[0]
         cell = measurement[:-2]
 
